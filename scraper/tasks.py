@@ -6,8 +6,8 @@ from scraper.utils import scrape_amazon_products
 
 logger = logging.getLogger(__name__)
 
-# @shared_task(bind=True, max_retries=3)
-def scrape_brand_products(brand_id):
+@shared_task(bind=True, max_retries=3)
+def scrape_brand_products(self, brand_id):
     logger.info("started processing")
     try:
         brand = Brand.objects.get(id=brand_id)
@@ -29,7 +29,7 @@ def scrape_brand_products(brand_id):
         logger.error(f"Brand with id {brand.id} does not exist.")
     except Exception as exc:
         logger.error(f"Error while scraping products for brand {brand.id}: {exc}")
-        # raise self.retry(exc=exc, countdown=60)
+        raise self.retry(exc=exc, countdown=60)
 
 
 

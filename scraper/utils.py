@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
@@ -7,7 +6,6 @@ from bs4 import BeautifulSoup
 import time
 import random
 
-# List of User Agents for rotation
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -16,11 +14,11 @@ USER_AGENTS = [
 ]
 
 
-# Function to introduce random delays
+
 def random_delay(min_delay=1, max_delay=5):
     time.sleep(random.uniform(min_delay, max_delay))
 
-# Function to get a random user agent
+
 def get_random_user_agent():
     return random.choice(USER_AGENTS)
 
@@ -29,10 +27,10 @@ def extract_products_from_response1(soup):
 
     product_list = []
     for product in products:
-        name = product.find('a')['title']  # Get the title from the link
-        asin = product['data-csa-c-item-id']  # Get the ASIN from the item id
-        image_url = product.find('img')['src']  # Get the image URL
-        sku = None  # SKU is not available in the provided HTML
+        name = product.find('a')['title']
+        asin = product['data-csa-c-item-id']
+        image_url = product.find('img')['src']
+        sku = None
 
         product_details = {
             'name': name,
@@ -72,31 +70,28 @@ def extract_products_from_response2(soup):
 
 
 def scrape_amazon_products(brand_url):
-    # Set up Selenium options
     options = Options()
-    options.headless = True  # Run headless Chrome (without GUI)
-    options.add_argument(f"user-agent={get_random_user_agent()}")  # Set random user agent
+    options.headless = True
+    options.add_argument(f"user-agent={get_random_user_agent()}")
 
-    # Initialize the WebDriver
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     driver.get(brand_url)
 
-    # Scroll down to load more products
+
     last_height = driver.execute_script("return document.body.scrollHeight")
     while True:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        random_delay(2, 5)  # Wait for new content to load
+        random_delay(2, 5)
 
-        # Calculate new scroll height and compare with last height
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
-            break  # No more products to load
+            break
         last_height = new_height
 
-    # After scrolling, parse the page source with BeautifulSoup
+
     soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-    # Check for CAPTCHA detection
+
     if "captcha" in soup.text.lower():
         print("CAPTCHA detected. Please solve the CAPTCHA manually.")
         driver.quit()

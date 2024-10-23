@@ -135,24 +135,13 @@ CELERY_TIMEZONE = 'UTC'
 
 
 from celery.schedules import crontab
-# from datetime import timedelta
-#
-# CELERY_BEAT_SCHEDULE = {
-#     'scrape-every-6-hours': {
-#         'task': 'scraper.tasks.test_celery_scheduler',
-#         'schedule': crontab(hour='*/6'),
-#         # 'schedule': timedelta(seconds=30),
-#     },
-# }
-
-
 from datetime import timedelta
 
 CELERY_BEAT_SCHEDULE = {
     'scrape-4-times-day': {
         'task': 'scraper.tasks.scrape_products_for_all_brands',
-        # 'schedule': crontab(hour='*/6')
-        'schedule': timedelta(seconds=30),
+        'schedule': crontab(hour='*/6')
+        # 'schedule': timedelta(seconds=30),
     },
 }
 
